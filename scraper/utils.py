@@ -1,6 +1,8 @@
 JOB_DETAILS_URL = "https://www.linkedin.com/jobs/api/jobPosting/"
 JOB_PAGINATION_URL = "https://www.linkedin.com/jobs/api/seeMoreJobPostings/search"
 
+REQUEST_TIME_PERIOD = 2
+
 JOB_SELECTOR = "body/li/div"
 JOB_TITLE = "./a/span/text()"
 JOB_URL = "./a/@href"
