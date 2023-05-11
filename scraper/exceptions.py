@@ -1,0 +1,2 @@
+class EmptyJobPage(Exception):
+    pass
