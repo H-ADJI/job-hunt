@@ -88,12 +88,13 @@ class JobCollector:
                         try:
                             jobs = self.__extract_job(page_content=content)
                             progress += self.iteration_progress
+                            for job in jobs:
+                                logger.debug(job[0])
+                                yield job
+
                         except EmptyJobPage:
                             logger.info(f"no jobs to grab from page after {progress} job")
                             break
-                        for job in jobs:
-                            logger.debug(job[0])
-                            yield job
                 self.__log_metrics(
                     starting_time=start, params=params, progress=progress, strategy=strategy
                 )
