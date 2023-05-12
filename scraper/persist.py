@@ -2,15 +2,23 @@ import json
 import os
 
 import gspread
+from google.cloud import secretmanager
+from google.oauth2 import service_account
 from loguru import logger
 
 from scraper.strategy import Strategy
 
-creds_file_path = "credentials.json"
-if not os.path.isfile(creds_file_path):
-    logger.warning("Credential file doesn't exists")
-with open(creds_file_path, "r") as f:
-    creds = json.load(f)
+local_creds = service_account.Credentials.from_service_account_file("credentials.json")
+secret_name = os.environ.get("secret_name", None)
+if not secret_name:
+    logger.warning(
+        "The secrect name was not loaded make you the env variable 'secret_name' is injected in the environment"
+    )
+secret_name = "projects/981650884874/secrets/sheet_api_creds/versions/1"
+client = secretmanager.SecretManagerServiceClient(credentials=local_creds)
+response = client.access_secret_version(name=secret_name)
+secret_value = response.payload.data.decode("UTF-8")
+creds = json.loads(secret_value)
 
 
 class Google_sheet:
