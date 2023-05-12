@@ -19,14 +19,13 @@ class Google_sheet:
         self.rows = ["title", "url", "location", "date", "company", "company_url"]
         self.connector = gspread.service_account_from_dict(info=creds)
         self.data = []
-        self.sheet = "linkedin_data"
-        self.sheet_name = None
+        self.sheet = None
         self.strategy = strategy
 
     def __enter__(self):
         if not self.strategy.sheet_id:
             logger.info("creating new sheet")
-            sheet = self.connector.create(self.sheet_name)
+            sheet = self.connector.create(self.strategy.sheet_name)
             self.strategy.sheet_id = sheet.id
             self.connector.insert_permission(
                 file_id=sheet.id, value=self.email, perm_type="user", role="writer"
@@ -34,6 +33,8 @@ class Google_sheet:
             sheet.sheet1.append_row(self.rows)
         else:
             sheet = self.connector.open_by_key(key=self.strategy.sheet_id)
+            self.strategy.sheet_name = sheet.title
+
         self.sheet = sheet.sheet1
         return self
 

@@ -23,7 +23,7 @@ def main(request: Request):
             for job in job_generator:
                 gs.append(job)
 
-    return collector.summary
+    return collector.summary | {"sheet_id": strategy.sheet_id, "sheet_name": strategy.sheet_name}
 
 
 # if __name__ == "__main__":

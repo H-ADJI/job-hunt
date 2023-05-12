@@ -9,6 +9,7 @@ class Strategy:
         self.countries = []
         self.keywords = []
         self.sheet_id = None
+        self.sheet_name = None
         self.limit = 50
         self.request_period = 2
         self.cooldown = 15
@@ -28,7 +29,7 @@ class Strategy:
     def __load_startegy_data(self, data: dict):
         configuration = data.get("configuration", {})
         self.sheet_id = configuration.get("sheet_id")
-        self.sheet_name = configuration.get("sheet_name")
+        self.sheet_name = configuration.get("sheet_name","Linkedin_data")
         self.cooldown = configuration.get("cooldown")
         self.request_period = configuration.get("request_period")
         mapping = data.get("mapping", {})
