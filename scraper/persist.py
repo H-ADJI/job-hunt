@@ -8,9 +8,9 @@ from loguru import logger
 
 from scraper.strategy import Strategy
 
-local_creds = service_account.Credentials.from_service_account_file("credentials.json")
 secret_name = os.environ.get("secret_name", None)
 if not secret_name:
+    local_creds = service_account.Credentials.from_service_account_file("credentials.json")
     logger.warning(
         "The secrect name was not loaded make you the env variable 'secret_name' is injected in the environment"
     )
