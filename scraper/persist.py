@@ -14,8 +14,9 @@ if not secret_name:
     logger.warning(
         "The secrect name was not loaded make you the env variable 'secret_name' is injected in the environment"
     )
-secret_name = "projects/981650884874/secrets/sheet_api_creds/versions/1"
-client = SecretManagerServiceClient(credentials=local_creds)
+    client = SecretManagerServiceClient(credentials=local_creds)
+
+client = SecretManagerServiceClient()
 response = client.access_secret_version(name=secret_name)
 secret_value = response.payload.data.decode("UTF-8")
 creds = json.loads(secret_value)
