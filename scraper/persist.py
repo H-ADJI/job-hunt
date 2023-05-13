@@ -2,7 +2,7 @@ import json
 import os
 
 import gspread
-from google.cloud import secretmanager
+from google.cloud.secretmanager import SecretManagerServiceClient
 from google.oauth2 import service_account
 from loguru import logger
 
@@ -15,7 +15,7 @@ if not secret_name:
         "The secrect name was not loaded make you the env variable 'secret_name' is injected in the environment"
     )
 secret_name = "projects/981650884874/secrets/sheet_api_creds/versions/1"
-client = secretmanager.SecretManagerServiceClient(credentials=local_creds)
+client = SecretManagerServiceClient(credentials=local_creds)
 response = client.access_secret_version(name=secret_name)
 secret_value = response.payload.data.decode("UTF-8")
 creds = json.loads(secret_value)
