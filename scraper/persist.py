@@ -3,30 +3,29 @@ import os
 
 import gspread
 from google.cloud.secretmanager import SecretManagerServiceClient
-from google.oauth2 import service_account
 from loguru import logger
 
 from scraper.strategy import Strategy
 
 secret_name = os.environ.get("secret_name", None)
-if not secret_name:
-    local_creds = service_account.Credentials.from_service_account_file("credentials.json")
-    logger.warning(
-        "The secrect name was not loaded make you the env variable 'secret_name' is injected in the environment"
-    )
-    client = SecretManagerServiceClient(credentials=local_creds)
-
-client = SecretManagerServiceClient()
-response = client.access_secret_version(name=secret_name)
-secret_value = response.payload.data.decode("UTF-8")
-creds = json.loads(secret_value)
 
 
 class Google_sheet:
     def __init__(self, strategy: Strategy) -> None:
         self.email = "h-adji_tech@proton.me"
         self.rows = ["title", "url", "location", "date", "company", "company_url"]
-        self.connector = gspread.service_account_from_dict(info=creds)
+        if secret_name:
+            client = SecretManagerServiceClient()
+            response = client.access_secret_version(name=secret_name)
+            secret_value = response.payload.data.decode("UTF-8")
+            creds = json.loads(secret_value)
+            self.connector = gspread.service_account_from_dict(info=creds)
+        else:
+            self.connector = gspread.service_account("credentials.json")
+            logger.warning(
+                "The secrect name was not loaded make you the env variable 'secret_name' is injected in the environment"
+            )
+
         self.data = []
         self.sheet = None
         self.strategy = strategy
