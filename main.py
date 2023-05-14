@@ -10,7 +10,7 @@ from scraper.persist import Google_sheet
 from scraper.strategy import Strategy
 
 logger.remove()
-logger.add(sys.stderr, level="INFO")
+logger.add(sys.stderr, level="WARNING")
 
 
 @functions_framework.http

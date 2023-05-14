@@ -15,6 +15,9 @@ class Google_sheet:
         self.email = "h-adji_tech@proton.me"
         self.rows = ["title", "url", "location", "date", "company", "company_url"]
         if secret_name:
+            logger.warning(
+                "Using env variable to connect to secret manager for the service account"
+            )
             client = SecretManagerServiceClient()
             response = client.access_secret_version(name=secret_name)
             secret_value = response.payload.data.decode("UTF-8")
@@ -22,9 +25,6 @@ class Google_sheet:
             self.connector = gspread.service_account_from_dict(info=creds)
         else:
             self.connector = gspread.service_account("credentials.json")
-            logger.warning(
-                "The secrect name was not loaded make you the env variable 'secret_name' is injected in the environment"
-            )
 
         self.data = []
         self.sheet = None
