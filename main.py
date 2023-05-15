@@ -6,24 +6,20 @@ from flask import Request
 from loguru import logger
 
 from scraper.collect import JobCollector
-from scraper.persist import Google_sheet
-from scraper.strategy import Strategy
 
 logger.remove()
-logger.add(sys.stderr, level="WARNING")
+logger.add(sys.stderr, level="DEBUG")
 
 
 @functions_framework.http
 def main(request: Request):
-    strategy_data = request.json
-    with Strategy(strategy_data=strategy_data) as strategy:
-        with Google_sheet(strategy=strategy) as gs:
-            collector = JobCollector()
-            job_generator = collector.collect(strategy=strategy)
-            for job in job_generator:
-                gs.append(job)
+    params = request.json
+    collector = JobCollector(**params)
+    job_generator = collector.collect()
+    for job in job_generator:
+        logger.debug(job)
 
-    return collector.summary | {"sheet_id": strategy.sheet_id, "sheet_name": strategy.sheet_name}
+    return {"count": collector.count}
 
 
 # if __name__ == "__main__":

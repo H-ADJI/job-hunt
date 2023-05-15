@@ -1,4 +1,4 @@
-from time import sleep, time
+from time import sleep
 
 import parsel
 import requests
@@ -6,7 +6,6 @@ from loguru import logger
 
 from scraper.exceptions import EmptyJobPage
 from scraper.parse import normalize_text
-from scraper.strategy import Strategy
 from scraper.utils import (
     HEADERS,
 )
@@ -22,9 +21,13 @@ class JobCollector:
     COMPANY_URL = "./div/h4/a/@href"
     JOB_PAGINATION_URL = "https://www.linkedin.com/jobs/api/seeMoreJobPostings/search"
     iteration_progress = 25
+    request_freq = 2
+    cooldown = 20
 
-    def __init__(self) -> None:
-        self.summary = {}
+    def __init__(self, location, timeframe=6) -> None:
+        self.location = location
+        # how old the jobs can be ( from hours -> seconds )
+        self.timeframe = f"r{timeframe * 3600}"
 
     def __paginate(self, session: requests.Session, params, progress):
         query_params = params | {"start": progress}
@@ -47,57 +50,35 @@ class JobCollector:
                 normalize_text(selector.xpath(JobCollector.COMPANY_URL).get()),
             )
 
-    def __log_metrics(self, starting_time: float, params: dict, progress: int, strategy: Strategy):
-        summary = {
-            params.get("keywords"): {
-                "row_count": progress,
-                "reached_limit": strategy.limit <= progress,
-                "duration": time() - starting_time,
-            }
-        }
-        self.summary[params.get("location")] = summary
-
-    def show_summary(self):
-        logger.info(self.summary)
-
-    def collect(self, strategy: Strategy):
-        combo_generator = strategy.generate_params_combo()
-
+    def collect(self):
         with requests.session() as session:
             session.headers.update(HEADERS)
-            for params in combo_generator:
-                progress = 0
-                start = time()
-                while strategy.limit > progress:
-                    content, url, status_code = self.__paginate(
-                        session=session, params=params, progress=progress
-                    )
-                    logger.info(f"GET {url}")
-                    logger.info(f"request for paginating to {progress} -  status : {status_code}")
-                    sleep(strategy.request_period)
-
-                    if status_code == 400:
-                        logger.warning("Got an 400 error, porbably there are no mroe jobs listings")
-                        break
-                    elif status_code == 429:
-                        logger.warning(
-                            f"Got an 429 error, too many requests sleeping for {strategy.cooldown}"
-                        )
-                        sleep(strategy.cooldown)
-                    else:
-                        try:
-                            jobs = self.__extract_job(page_content=content)
-                            progress += self.iteration_progress
-                            for job in jobs:
-                                logger.debug(job[0])
-                                yield job
-
-                        except EmptyJobPage:
-                            logger.info(f"no jobs to grab from page after {progress} job")
-                            break
-                self.__log_metrics(
-                    starting_time=start, params=params, progress=progress, strategy=strategy
+            progress = 0
+            while True:
+                content, url, status_code = self.__paginate(
+                    session=session,
+                    params=dict(location=self.location, f_TPR=self.timeframe),
+                    progress=progress,
                 )
+                logger.debug(f"GET {url}")
+                logger.debug(f"request for paginating to {progress} -  status : {status_code}")
+                sleep(self.request_freq)
 
-    def content_filter(self):
-        pass
+                if status_code == 400:
+                    logger.info("Got an 400 error, porbably there are no more jobs listings")
+                    break
+                elif status_code == 429:
+                    logger.info(f"Got an 429 error, too many requests sleeping for {self.cooldown}")
+                    sleep(self.cooldown)
+                else:
+                    try:
+                        jobs = self.__extract_job(page_content=content)
+                        progress += self.iteration_progress
+                        for job in jobs:
+                            logger.debug(job[0])
+                            yield job
+
+                    except EmptyJobPage:
+                        logger.info(f"no jobs to grab from page after {progress} job")
+                        break
+        self.count = progress
