@@ -1,3 +1,4 @@
+import re
 from time import sleep
 
 import parsel
@@ -12,6 +13,7 @@ from scraper.utils import (
 
 
 class JobCollector:
+    ID_REGEX_PATTERN = r"\d+(?=\?ref)"
     JOB_SELECTOR = "body/li/div"
     JOB_TITLE = "./a/span/text()"
     JOB_URL = "./a/@href"
@@ -41,9 +43,15 @@ class JobCollector:
         if not jobs_selected:
             raise EmptyJobPage("No job to select in the current page")
         for selector in jobs_selected:
+            url = normalize_text(selector.xpath(JobCollector.JOB_URL).get())
+            match = re.search(self.ID_REGEX_PATTERN, url)
+            id = None
+            if match:
+                id = match.group(0)
             yield (
+                id,
+                url,
                 normalize_text(selector.xpath(JobCollector.JOB_TITLE).get()),
-                normalize_text(selector.xpath(JobCollector.JOB_URL).get()),
                 normalize_text(selector.xpath(JobCollector.JOB_LOCATION).get()),
                 normalize_text(selector.xpath(JobCollector.JOB_LISTING_DATE).get()),
                 normalize_text(selector.xpath(JobCollector.COMPANY_NAME).get()),
