@@ -33,13 +33,14 @@ class Job(SQLModel, table=True):
 env_settings = DotEnv()
 
 engine = create_engine(
-    sqlalchemy.engine.url.URL.create(
-        drivername="postgresql",
-        username=env_settings.DEV_USER,
-        password=env_settings.DEV_DB_PASSWORD,
-        database=env_settings.DEV_DB,
-        query={"unix_socket": env_settings.unix_socket_path},
-    )
+    # sqlalchemy.engine.url.URL.create(
+    #     drivername="postgresql",
+    #     username=env_settings.DEV_USER,
+    #     password=env_settings.DEV_DB_PASSWORD,
+    #     database=env_settings.DEV_DB,
+    #     query={"unix_socket": env_settings.unix_socket_path},
+    # )
+    env_settings.DB_URL
 )
 
 
