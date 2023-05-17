@@ -7,7 +7,7 @@ from loguru import logger
 from sqlmodel import Session
 
 from scraper.collect import JobCollector
-from scraper.persist import Job, create_tables, engine, env_settings
+from scraper.persist import Job, engine, create_tables, env_settings
 
 logger.remove()
 if env_settings.IS_DEV:
