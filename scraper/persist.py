@@ -1,18 +1,17 @@
 from datetime import datetime
 from typing import Optional
 
-import sqlalchemy
 from pydantic import BaseSettings
 from sqlmodel import Field, SQLModel, create_engine
 
 
 class DotEnv(BaseSettings):
     IS_DEV: bool
-    DB_URL: str
-    DEV_USER: str
-    DEV_DB_PASSWORD: str
-    DEV_DB: str
-    unix_socket_path: str
+    USER: str
+    PASSWORD: str
+    DB_NAME: str
+    DB_HOST: str
+    DB_URL: str = None
 
     class Config:
         env_file = ".env"
@@ -32,16 +31,12 @@ class Job(SQLModel, table=True):
 
 env_settings = DotEnv()
 
-engine = create_engine(
-    # sqlalchemy.engine.url.URL.create(
-    #     drivername="postgresql",
-    #     username=env_settings.DEV_USER,
-    #     password=env_settings.DEV_DB_PASSWORD,
-    #     database=env_settings.DEV_DB,
-    #     query={"unix_socket": env_settings.unix_socket_path},
-    # )
-    env_settings.DB_URL
-)
+if env_settings.IS_DEV:
+    engine = create_engine(url=env_settings.DB_URL)
+else:
+    engine = create_engine(
+        url=f"postgresql://{env_settings.USER}:{env_settings.PASSWORD}@{env_settings.DB_HOST}/{env_settings.DB_NAME}"
+    )
 
 
 def create_tables():
