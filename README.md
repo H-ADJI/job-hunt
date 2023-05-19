@@ -17,8 +17,7 @@ Finding the url used to populate the linkedin job page was not that difficult. H
 - Navigate to the page that contains the data you're interested in.
 - Use isolated browsers contexts (aka private tabs) so that your cookies, extensions and cache doesn't interfere with the process.
 - Disable Javascript permission from the page so that you know if the page comes pre-populated with data.
-- In case no data is rendered when disabling javascript.
-- Navigate to the network tab in the devtool and inspect the response of the network calls until you find the data you're looking for.
+- In case no data is rendered when disabling javascript navigate to the network tab in the devtool and inspect the response of the network calls until you find the data you're looking for.
 - Use CTRL+f extensively: grab some piece of data from the web page and go look for it in then elements + network tab within devtools.
 
 This process is called API reverse engineering, my introduction to it was through Game cheating forums where gamers are figuring out how their favorite game's backend work, defeating cheat detection, and all of the other fine things in life. Shout out to [Reverse Engineering Games](https://www.reddit.com/r/REGames/) and [UnkownCheats](https://www.unknowncheats.me/forum/index.php).
