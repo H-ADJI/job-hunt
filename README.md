@@ -66,7 +66,7 @@ Requires account log in, unfortunately.
 
 ### Architecture Diagram
 
-![architecture image](/Linkedin_serverless_scraper.png "architecture")
+![architecture image](/Linkedin_serverless_archi.png "architecture")
 
 ### Explanation
 
