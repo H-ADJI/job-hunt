@@ -32,7 +32,7 @@ class Job(SQLModel, table=True):
 env_settings = DotEnv()
 
 if env_settings.IS_DEV:
-    engine = create_engine(url=env_settings.DB_URL)
+    engine = create_engine(url="sqlite:///job_dev.db")
 else:
     engine = create_engine(
         url=f"postgresql://{env_settings.USER}:{env_settings.PASSWORD}@{env_settings.DB_HOST}/{env_settings.DB_NAME}"

@@ -25,14 +25,15 @@ class JobCollector:
     iteration_progress = 25
     request_freq = 2
     cooldown = 20
+    search_query = ["backend", "software engineer", "data engineer"]
 
     def __init__(self, location, timeframe=6) -> None:
         self.location = location
         # how old the jobs can be ( from hours -> seconds )
         self.timeframe = f"r{timeframe * 3600}"
 
-    def __paginate(self, session: requests.Session, params, progress):
-        query_params = params | {"start": progress}
+    def __paginate(self, session: requests.Session, params, progress, query):
+        query_params = params | {"keywords": query, "start": progress}
         response: requests.Response = session.get(self.JOB_PAGINATION_URL, params=query_params)
         return response.text, response.url, response.status_code
 
@@ -61,32 +62,36 @@ class JobCollector:
     def collect(self):
         with requests.session() as session:
             session.headers.update(HEADERS)
-            progress = 0
-            while True:
-                content, url, status_code = self.__paginate(
-                    session=session,
-                    params=dict(location=self.location, f_TPR=self.timeframe),
-                    progress=progress,
-                )
-                logger.debug(f"GET {url}")
-                logger.debug(f"request for paginating to {progress} -  status : {status_code}")
-                sleep(self.request_freq)
+            for query in self.search_query:
+                progress = 0
+                while True:
+                    content, url, status_code = self.__paginate(
+                        session=session,
+                        params=dict(location=self.location, f_TPR=self.timeframe),
+                        progress=progress,
+                        query=query,
+                    )
+                    logger.debug(f"GET {url}")
+                    logger.debug(f"request for paginating to {progress} -  status : {status_code}")
+                    sleep(self.request_freq)
 
-                if status_code == 400:
-                    logger.info("Got an 400 error, porbably there are no more jobs listings")
-                    break
-                elif status_code == 429:
-                    logger.info(f"Got an 429 error, too many requests sleeping for {self.cooldown}")
-                    sleep(self.cooldown)
-                else:
-                    try:
-                        jobs = self.__extract_job(page_content=content)
-                        progress += self.iteration_progress
-                        for job in jobs:
-                            logger.debug(job[0])
-                            yield job
-
-                    except EmptyJobPage:
-                        logger.info(f"no jobs to grab from page after {progress} job")
+                    if status_code == 400:
+                        logger.info("Got an 400 error, porbably there are no more jobs listings")
                         break
+                    elif status_code == 429:
+                        logger.info(
+                            f"Got an 429 error, too many requests sleeping for {self.cooldown}"
+                        )
+                        sleep(self.cooldown)
+                    else:
+                        try:
+                            jobs = self.__extract_job(page_content=content)
+                            progress += self.iteration_progress
+                            for job in jobs:
+                                logger.debug(job[0])
+                                yield job
+
+                        except EmptyJobPage:
+                            logger.info(f"no jobs to grab from page after {progress} job")
+                            break
         self.count = progress
