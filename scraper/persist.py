@@ -17,7 +17,7 @@ class DotEnv(BaseSettings):
         env_file = ".env"
 
 
-class Job(SQLModel, table=True):
+class DevJobs(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     linkedin_id: Optional[str] = Field(index=True)
     url: Optional[str]
