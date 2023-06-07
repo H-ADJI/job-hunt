@@ -7,7 +7,7 @@ from loguru import logger
 from sqlmodel import Session
 
 from scraper.collect import JobCollector
-from scraper.persist import Job, engine, create_tables, env_settings
+from scraper.persist import DevJobs, create_tables, engine, env_settings
 
 logger.remove()
 if env_settings.IS_DEV:
@@ -25,7 +25,7 @@ def main(request: Request):
     with Session(bind=engine) as db_session:
         for i, job in enumerate(job_generator):
             db_session.add(
-                Job(
+                DevJobs(
                     linkedin_id=job[0],
                     url=job[1],
                     title=job[2],
