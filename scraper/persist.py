@@ -23,7 +23,7 @@ class DevJobs(SQLModel, table=True):
     url: Optional[str]
     title: Optional[str]
     location: Optional[str]
-    posting_date: Optional[datetime]
+    posting_date: Optional[str]
     company_name: Optional[str]
     company_url: Optional[str]
     is_visited: bool = False
