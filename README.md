@@ -60,7 +60,7 @@ The data fields that can be accessed from this page are (in addition to the fiel
 
 ### Company details
 
-Requires account log in, unfortunately.
+Behind sign in wall, unfortunately.
 
 ## Data Pipeline Architecture
 
@@ -78,7 +78,7 @@ For example a scheduling job that is running every 6 hours per day should only c
 
 ```json
 {
-    "location": "morocco",
-    "timeframe": "6"
+  "location": "morocco",
+  "timeframe": "6"
 }
 ```
